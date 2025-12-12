@@ -148,8 +148,8 @@ const config = {
                 href: 'https://github.com/Ashu11-A',
               },
               {
-                label: 'Dev Drylian',
-                href: 'https://github.com/drylian',
+                label: 'Dev Drysius',
+                href: 'https://github.com/drysius',
               },
             ],
           },
