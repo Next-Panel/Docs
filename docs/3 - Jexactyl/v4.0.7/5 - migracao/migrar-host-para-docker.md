@@ -21,10 +21,10 @@ As variáveis **`APP_KEY`** e **`HASHIDS_SALT`** do seu `.env` atual **devem ser
 Antes de exportar os dados, pause o worker de filas para evitar novas escritas:
 
 ```bash
-# 1. Parar temporariamente as filas do host
-sudo systemctl stop pteroq.service
-# Caso seu serviço tenha sido nomeado como panel.service:
-# sudo systemctl stop panel.service
+# 1. Parar temporariamente o serviço de filas do painel no host
+sudo systemctl stop panel.service
+# Caso sua instalação anterior ainda utilize o nome legado do Pterodactyl:
+# sudo systemctl stop pteroq.service
 
 # 2. Exportar o banco de dados atual do painel (substitua jexactyl pelo nome do seu banco atual se for diferente)
 mariadb-dump -u root -p jexactyl > ~/painel-backup.sql
@@ -136,25 +136,21 @@ Caso utilize **Nginx**, aponte a diretiva `proxy_pass http://127.0.0.1:8085;` no
 Por fim, desative o serviço de fila legado do host para não consumir recursos desnecessários da máquina:
 
 ```bash
-sudo systemctl disable --now pteroq.service
-# Caso seu serviço tenha sido configurado como panel.service:
-# sudo systemctl disable --now panel.service
+sudo systemctl disable --now panel.service
+# Caso sua instalação anterior ainda utilize o nome legado do Pterodactyl:
+# sudo systemctl disable --now pteroq.service
 ```
 
 ---
 
 ## 6. Configurar Backup Periódico no Crontab
 
-Atualize sua rotina de backup no `crontab` do host para gerar os dumps a partir do container MariaDB do Docker (`sudo crontab -e`):
+Atualize sua rotina de backup no `crontab` do sistema (`sudo crontab -e`). Usando `sudo`, o comando executa o dump aproveitando diretamente as variáveis de ambiente que o container já possui carregadas do `.env`, sem a necessidade de expor ou digitar senhas no agendador:
 
 ```cron
-# Gera backup diário do banco do Docker à meia-noite (00:00)
-0 0 * * * docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database mariadb-dump -u<DB_USERNAME> -p<DB_PASSWORD> <DB_DATABASE> > /backups/databases/jexactyl-backup-$(date +\%F).sql
+# Backup diário do banco do Docker à meia-noite (00:00)
+0 0 * * * sudo docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup-$(date +\%F).sql
 
-# (Opcional) Dumps frequentes (ex: a cada 40 minutos)
-*/40 * * * * docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database mariadb-dump -u<DB_USERNAME> -p<DB_PASSWORD> <DB_DATABASE> > /backups/databases/jexactyl-backup.sql
+# (Opcional) Dumps em intervalos menores (ex: a cada 40 minutos)
+*/40 * * * * sudo docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup.sql
 ```
-
-:::tip Script Auxiliar para o Crontab
-Para evitar expor senhas diretamente no `crontab`, você pode criar um script executável (ex: `/backups/dump-jexactyl.sh`) que extrai `DB_PASSWORD` e `DB_DATABASE` diretamente do arquivo `/var/www/jexactyl-docker/.env` e executa o comando `mariadb-dump`.
-:::
