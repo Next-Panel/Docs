@@ -1,12 +1,7 @@
 import React from "react";
 import CodeBlock from '@theme/CodeBlock';
 
-/**
- * Isso esta aqui por que o CodeBlock no mdx estava retornando erro,
- * é uma solução que bem provavelmente no futuro será mudada para algo melhor
- */
-
-export function NginxNoSSLs(jex = false) {
+export function NginxNoSSLs(jex = false, phpVersion = "8.1") {
     return `# Substitua o <domain> pelo nome do seu dominio ou seu IP
 server {
     listen 80;
@@ -32,12 +27,12 @@ server {
 
     sendfile off;
 
-    location ~ \.php$ {
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+    location ~ \\.php$ {
+        fastcgi_split_path_info ^(.+\\.php)(/.+)$;
+        fastcgi_pass unix:/run/php/php${phpVersion}-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
+        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \\n post_max_size=100M";
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param HTTP_PROXY "";
         fastcgi_intercept_errors off;
@@ -48,12 +43,12 @@ server {
         fastcgi_read_timeout 300;
     }
 
-    location ~ /\.ht {
+    location ~ /\\.ht {
         deny all;
     }
 }`}
 
-export function NginxSSLs(jex = false) {
+export function NginxSSLs(jex = false, phpVersion = "8.1") {
     return `# Substitua o <domain> pelo nome do seu dominio ou seu IP
 server {
     listen 80;
@@ -96,12 +91,12 @@ server {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
-    location ~ \.php$ {
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+    location ~ \\.php$ {
+        fastcgi_split_path_info ^(.+\\.php)(/.+)$;
+        fastcgi_pass unix:/run/php/php${phpVersion}-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
+        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \\n post_max_size=100M";
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param HTTP_PROXY "";
         fastcgi_intercept_errors off;
@@ -113,21 +108,88 @@ server {
         include /etc/nginx/fastcgi_params;
     }
 
-    location ~ /\.ht {
+    location ~ /\\.ht {
         deny all;
     }
 }`}
 
-export function NginxNoSSL({ jex = false }) {
-    return (
-        <CodeBlock language="bash">{NginxNoSSLs(jex)}
-        </CodeBlock>
-    )
+export function NginxDockerNoSSLs() {
+    return `# Proxy Reverso Nginx para o container Docker (127.0.0.1:8085) — Sem SSL
+# Substitua <domain> pelo seu domínio ou endereço IP
+server {
+    listen 80;
+    server_name <domain>;
+
+    client_max_body_size 100m;
+
+    location / {
+        proxy_pass http://127.0.0.1:8085;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 300s;
+    }
+}`;
 }
 
-export function NginxSSL({ jex = false }) {
+export function NginxDockerSSLs() {
+    return `# Proxy Reverso Nginx para o container Docker (127.0.0.1:8085) — Com SSL
+# Substitua <domain> pelo seu domínio
+server {
+    listen 80;
+    server_name <domain>;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name <domain>;
+
+    ssl_certificate /etc/letsencrypt/live/<domain>/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/<domain>/privkey.pem;
+    ssl_session_cache shared:SSL:10m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    client_max_body_size 100m;
+
+    location / {
+        proxy_pass http://127.0.0.1:8085;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 300s;
+    }
+}`;
+}
+
+export function NginxNoSSL({ jex = false, phpVersion = "8.1" }) {
     return (
-        <CodeBlock language="bash">{NginxSSLs(jex)}
-        </CodeBlock>
-    )
+        <CodeBlock language="nginx">{NginxNoSSLs(jex, phpVersion)}</CodeBlock>
+    );
+}
+
+export function NginxSSL({ jex = false, phpVersion = "8.1" }) {
+    return (
+        <CodeBlock language="nginx">{NginxSSLs(jex, phpVersion)}</CodeBlock>
+    );
+}
+
+export function NginxDockerNoSSL() {
+    return (
+        <CodeBlock language="nginx">{NginxDockerNoSSLs()}</CodeBlock>
+    );
+}
+
+export function NginxDockerSSL() {
+    return (
+        <CodeBlock language="nginx">{NginxDockerSSLs()}</CodeBlock>
+    );
 }

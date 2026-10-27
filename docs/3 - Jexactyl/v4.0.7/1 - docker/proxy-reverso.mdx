@@ -1,0 +1,73 @@
+---
+sidebar_position: 2
+---
+
+# Proxy Reverso com Caddy ou Nginx
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { NginxDockerSSL, NginxDockerNoSSL } from '@site/src/components/Pages/Nginx';
+import { CaddyDockerSSL, CaddyDockerNoSSL } from '@site/src/components/Pages/Caddy';
+
+Quando utilizamos o painel em Docker, o container já possui seu próprio servidor web interno escutando na porta `80` do container, mapeada por padrão para `127.0.0.1:8085` na máquina hospedeira (evitando qualquer conflito com a porta `8080` do daemon **Wings**).
+
+Para usar **Caddy** ou **Nginx** instalados na máquina sem **conflito de portas (`80`/`443`)** e sem **erros de HTTPS/CSRF (`419 Page Expired` ou *Mixed Content*)**, siga as 3 regras abaixo:
+
+1. **No `.env` do painel**, mantenha **`PANEL_PORT=127.0.0.1:8085`** (assim as portas públicas `80` e `443` da máquina ficam livres para o seu Caddy ou Nginx, e a porta `8080` fica livre para o Wings).
+2. **No `.env` do painel**, mantenha **`TRUSTED_PROXIES=*`** e defina **`APP_URL`** exatamente com `https://...` (se usar certificado) ou `http://...` (se não usar certificado).
+3. **Deixe `LE_EMAIL` vazio** no `.env` do container — quem gerencia o certificado SSL é o Caddy ou o Nginx da máquina hospedeira.
+
+---
+
+## Opção A: Usando Caddy (`/etc/caddy/Caddyfile`)
+
+Abra o arquivo `/etc/caddy/Caddyfile` e adicione o bloco correspondente ao seu cenário (substituindo `<domain>` pelo seu domínio ou endereço IP):
+
+<Tabs>
+  <TabItem value="caddy-ssl" label="Com Certificado SSL Automático (HTTPS)" default>
+    <p><em>No <code>.env</code>, defina <code>APP_URL=https://&lt;domain&gt;</code>:</em></p>
+    <CaddyDockerSSL />
+  </TabItem>
+  <TabItem value="caddy-nossl" label="Sem Certificado (Apenas HTTP)">
+    <p><em>No <code>.env</code>, defina <code>APP_URL=http://&lt;domain&gt;</code>:</em></p>
+    <CaddyDockerNoSSL />
+  </TabItem>
+</Tabs>
+
+Recarregue o Caddy para aplicar:
+
+```bash
+sudo systemctl reload caddy
+```
+
+---
+
+## Opção B: Usando Nginx (`/etc/nginx/sites-available/jexactyl.conf`)
+
+Caso utilize **Com Certificado SSL**, gere antes o certificado Let's Encrypt com o Certbot (`sudo apt install -y certbot python3-certbot-nginx && sudo certbot certonly --nginx -d <domain>`).
+
+Em seguida, crie o arquivo `/etc/nginx/sites-available/jexactyl.conf`:
+
+```bash
+sudo nano /etc/nginx/sites-available/jexactyl.conf
+```
+
+Cole uma das configurações abaixo (substituindo `<domain>` pelo seu domínio ou IP):
+
+<Tabs>
+  <TabItem value="nginx-ssl" label="Com Certificado SSL (HTTPS)" default>
+    <p><em>No <code>.env</code>, defina <code>APP_URL=https://&lt;domain&gt;</code>:</em></p>
+    <NginxDockerSSL />
+  </TabItem>
+  <TabItem value="nginx-nossl" label="Sem Certificado (Apenas HTTP)">
+    <p><em>No <code>.env</code>, defina <code>APP_URL=http://&lt;domain&gt;</code>:</em></p>
+    <NginxDockerNoSSL />
+  </TabItem>
+</Tabs>
+
+Ative o site e recarregue o Nginx:
+
+```bash
+sudo ln -sf /etc/nginx/sites-available/jexactyl.conf /etc/nginx/sites-enabled/jexactyl.conf
+sudo nginx -t && sudo systemctl reload nginx
+```

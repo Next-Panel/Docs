@@ -1,0 +1,53 @@
+---
+sidebar_position: 1
+---
+
+# Configurar Certificado SSL (Certbot)
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CodeBlock from '@theme/CodeBlock';
+
+:::info Usa Caddy?
+Se você utiliza o **Caddy**, o certificado SSL Let's Encrypt já é emitido e renovado automaticamente sem necessidade de instalar o Certbot para o painel. Você só precisará do Certbot na máquina caso vá rodar o daemon **Wings** no mesmo servidor.
+:::
+
+## 1. Instalar o Certbot
+
+<Tabs>
+  <TabItem value="nginx-code" label="Certbot com Nginx" default>
+    <CodeBlock language="bash">
+      sudo apt install -y certbot python3-certbot-nginx
+    </CodeBlock>
+  </TabItem>
+  <TabItem value="apache-code" label="Certbot com Apache">
+    <CodeBlock language="bash">
+      sudo apt install -y certbot python3-certbot-apache
+    </CodeBlock>
+  </TabItem>
+</Tabs>
+
+---
+
+## 2. Emitir o Certificado SSL
+
+Certifique-se de que o registro DNS (`A`) do seu domínio já aponta para o IP público do servidor (com proxy da Cloudflare desativado/nuvem cinza durante a emissão standalone/HTTP) e execute:
+
+<Tabs>
+  <TabItem value="nginx" label="Nginx" default>
+    <CodeBlock language="bash">
+      sudo certbot certonly --nginx -d painel.seudominio.com.br
+    </CodeBlock>
+  </TabItem>
+  <TabItem value="apache" label="Apache">
+    <CodeBlock language="bash">
+      sudo certbot certonly --apache -d painel.seudominio.com.br
+    </CodeBlock>
+  </TabItem>
+  <TabItem value="standalone" label="Standalone (Diretamente)">
+    <CodeBlock language="bash">
+{`# Pare o servidor web antes de usar o modo standalone na porta 80
+sudo certbot certonly --standalone -d painel.seudominio.com.br`}
+    </CodeBlock>
+  </TabItem>
+</Tabs>

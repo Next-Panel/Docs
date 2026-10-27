@@ -4,76 +4,40 @@ sidebar_position: 1
 
 # NextPanel
 
-Seu próximo Painel está aqui
+Seu próximo Painel está aqui.
 
-![lOGO](https://raw.githubusercontent.com/Next-Panel/.github/main/profile/gif/baner.gif)
+![Banner NextPanel](https://raw.githubusercontent.com/Next-Panel/.github/main/profile/gif/baner.gif)
 
-### Oque Somos?
-- Somos uma equipe organização criada com varios objetivos. Sendo principalmente traduzir alguns projetos para a língua portuguesa.
+### O que somos?
+- Somos uma organização dedicada a traduzir, adaptar e manter painéis de gerenciamento de servidores de jogos para o Português do Brasil, integrando recursos essenciais para o ecossistema brasileiro.
 
+## Principais Projetos
 
-## Principais Projetos.
+| Jexactyl Brasil (`v4.0.7` e `v3.8.6`) — Traduzido para Português do Brasil |
+| :--- |
+| [![Banner Jexactyl](https://raw.githubusercontent.com/Next-Panel/.github/main/profile/image/jexactyl-banner.jpeg)](/docs/Jexactyl/intro) |
 
+O **Jexactyl Brasil** (baseado no **Jexpanel v4**) é um painel de gerenciamento de servidores de jogos moderno e completo construído sobre o [Pterodactyl](https://pterodactyl.io), trazendo faturamento integrado, segurança avançada e personalização em tempo real.
 
-| Instalação do Jexactyl - Traduzido para Português |
-|--------------------------------------------------------------------------------------------------------------------------------------------------|
-|[![Logo Image](https://raw.githubusercontent.com/Next-Panel/.github/main/profile/image/jexactyl-banner.jpeg)](https://nextpanel.com.br//docs/category/Jexactyl)|
+#### Principais recursos na `v4.0.7`:
+- **Instalação Simplificada via Docker (Recomendado):** Suba o painel completo (PHP 8.4 + Nginx + MariaDB 11 + Redis) em minutos com `docker compose up -d`, pronto para rodar junto com **Caddy** ou **Nginx**.
+- **Faturamento Integrado para o Brasil:**
+  - Integração nativa com **Mercado Pago (Checkout Pro)** aceitando **Pix** (aprovação instantânea via webhook), **Cartão** e **Boleto**, lado a lado com a **Stripe**.
+  - Faturas em PDF, cupons de desconto, renovações automáticas e upgrades de plano.
+- **Autenticação e Segurança:**
+  - Passkeys (WebAuthn), autenticação em duas etapas (2FA), proteção JGuard e login social com Discord e Google SSO.
+- **Administração e Operação:**
+  - Editor de temas com pré-visualização em tempo real, sistema integrado de chamados (tickets), assistente com IA, aprovação de contas e cargos administrativos granulares.
 
-| Informações |
-|-------------------------------------|
-| O Jexactyl é um fork de código aberto e rico em recursos do [Pterodactyl](https://pterodactyl.io) que inclui vários recursos e melhorias em relação ao software existente.|
+---
 
-#### Ele inclui recursos como:
-- Cadastro de usuário
-   - Suporta e-mail e métodos Discord OAuth
-   - Os usuários podem ser aprovados ou negados por um administrador (opcional, configurável)
-   - a capacidade de atribuir recursos aos usuários instantaneamente na inscrição
-- Loja Jexactyl
-   - A capacidade de os usuários implantarem seus próprios servidores
-   - Stripe:tm: e PayPal:tm: integração para pagamentos
-   - Recurso personalizável e limitação de compra
-   - Sistema de referência para aumentar sua plataforma
-   - Ganho AFK, para garantir a retenção do usuário
-- Gerenciador de plugins para servidores  de Minecraft:tm: 
-- Sistema de renovação de servidores, para manter os usuários ativos
+| Instalação do Pterodactyl — Traduzido para Português |
+| :--- |
+| [![Logo Pterodactyl](https://cdn.pterodactyl.io/logos/new/pterodactyl_logo.png)](/docs/Pterodactyl/intro) |
 
-
-***
-
-| Instalação do Pterodactyl - Traduzido para Português |
-|--------------------------------------------------------------------------------------------------|
-|[![Logo Image](https://cdn.pterodactyl.io/logos/new/pterodactyl_logo.png)](https://nextpanel.com.br//docs/category/pterodactyl)|
-
-| Informações |
-|-------------------------------------|
-|O Pterodactyl® é um painel de gerenciamento de servidor de jogos gratuito e de código aberto construído com PHP, React e Go. Projetado com segurança em mente, o Pterodactyl executa todos os servidores de jogos em contêineres Docker isolados enquanto expõe uma interface bonita e intuitiva IU para usuários finais.|
-|Pare de se contentar com menos. Torne os servidores de jogo um cidadão de primeira classe em sua plataforma.|
+O **Pterodactyl®** é um painel de gerenciamento de servidores de jogos gratuito e de código aberto construído com PHP, React e Go. Projetado com segurança em mente, o Pterodactyl executa todos os servidores de jogos em contêineres Docker isolados enquanto expõe uma interface intuitiva para usuários finais.
 
 #### Jogos suportados
-
-O Pterodactyl oferece suporte a uma ampla variedade de jogos, utilizando contêineres Docker para isolar cada instância. Isto dá
-você o poder de executar servidores de jogo sem inchar as máquinas com uma série de dependências adicionais.
-
-Alguns de nossos principais jogos suportados incluem:
-
-* Minecraft — incluindo Paper, Sponge, Bungeecord, Waterfall, e mais
-* Rust
-* Terraria
-* Teamspeak
-* Mumble
-* Team Fortress 2
-* Counter Strike: Global Offensive
-* Garry's Mod
-* ARK: Survival Evolved
-
-Além de nosso nest padrão de jogos suportados, nossa comunidade está constantemente ultrapassando os limites deste software
-e há muitos outros jogos disponíveis fornecidos pela comunidade. Alguns desses jogos incluem:
-
-* Factorio
-* San Andreas: MP
-* Pocketmine MP
-* Squad
-* Xonotic
-* Starmade
-* Discord ATLBot, e outros Node.js/Python discord bots
-* [e muito mais...](https://github.com/parkervcp/eggs)
+* Minecraft — incluindo Paper, Sponge, Bungeecord, Waterfall e mais
+* Rust, Terraria, ARK: Survival Evolved, Garry's Mod, Counter-Strike, Team Fortress 2
+* Teamspeak, Mumble, Factorio, San Andreas: MP, Pocketmine MP, Bots em Node.js/Python e [muito mais](https://github.com/parkervcp/eggs).

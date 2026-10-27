@@ -1,0 +1,45 @@
+---
+sidebar_position: 3
+---
+
+# Usando Caddy
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { CaddyNoSSL, CaddySSL, CaddyDockerNoSSL, CaddyDockerSSL } from '@site/src/components/Pages/Caddy';
+
+Escolha abaixo se você instalou o painel **via Docker** ou **diretamente na máquina (PHP 8.4-FPM)**:
+
+## Opção 1: Caddy como Proxy Reverso para Docker (Recomendado)
+
+Se você subiu o painel via Docker com `PANEL_PORT=127.0.0.1:8085` e `TRUSTED_PROXIES=*`, adicione ao seu `/etc/caddy/Caddyfile`:
+
+<Tabs>
+  <TabItem value="docker-ssl" label="Docker + Caddy (Com SSL Automático)" default>
+    <CaddyDockerSSL />
+  </TabItem>
+  <TabItem value="docker-nossl" label="Docker + Caddy (Sem SSL)">
+    <CaddyDockerNoSSL />
+  </TabItem>
+</Tabs>
+
+---
+
+## Opção 2: Caddy para Instalação Direta na Máquina (`php8.4-fpm.sock`)
+
+Se você instalou o painel diretamente em `/var/www/jexactyl` com **PHP 8.4**, edite `/etc/caddy/Caddyfile` e substitua `<domain>` pelo seu domínio ou IP:
+
+<Tabs>
+  <TabItem value="host-ssl" label="Host PHP 8.4 (Com SSL)" default>
+    <CaddySSL jex={true} phpVersion="8.4" />
+  </TabItem>
+  <TabItem value="host-nossl" label="Host PHP 8.4 (Sem SSL)">
+    <CaddyNoSSL jex={true} phpVersion="8.4" />
+  </TabItem>
+</Tabs>
+
+### Aplicando a Configuração no Caddy
+
+```bash
+sudo systemctl reload caddy
+```

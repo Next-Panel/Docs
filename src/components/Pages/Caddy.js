@@ -1,12 +1,7 @@
 import React from "react";
 import CodeBlock from '@theme/CodeBlock';
 
-/**
- * Isso esta aqui por que o CodeBlock no mdx estava retornando erro,
- * é uma solução que bem provavelmente no futuro será mudada para algo melhor
- */
-
-export function CaddyNoSSLs(jex = false) {
+export function CaddyNoSSLs(jex = false, phpVersion = "8.1") {
     return `# Substitua o <domain> pelo nome do seu dominio ou seu IP
 {
     servers :80 {
@@ -21,7 +16,7 @@ export function CaddyNoSSLs(jex = false) {
 
     file_server
 
-    php_fastcgi unix//run/php/php8.1-fpm.sock {
+    php_fastcgi unix//run/php/php${phpVersion}-fpm.sock {
         root /var/www/${jex ? "jexactyl" : "pterodactyl"}/public
         index index.php
 
@@ -59,7 +54,7 @@ export function CaddyNoSSLs(jex = false) {
 }`
 }
 
-export function CaddySSLs(jex = false) {
+export function CaddySSLs(jex = false, phpVersion = "8.1") {
     return `# Substitua o <domain> pelo nome do seu dominio ou seu IP
 {
     servers :443 {
@@ -74,7 +69,7 @@ export function CaddySSLs(jex = false) {
 
     file_server
 
-    php_fastcgi unix//run/php/php8.1-fpm.sock {
+    php_fastcgi unix//run/php/php${phpVersion}-fpm.sock {
         root /var/www/${jex ? "jexactyl" : "pterodactyl"}/public
         index index.php
 
@@ -111,16 +106,48 @@ export function CaddySSLs(jex = false) {
     }
 }`}
 
-export function CaddyNoSSL({ jex = false }) {
-    return (
-        <CodeBlock language="bash">{CaddyNoSSLs(jex)}
-        </CodeBlock>
-    )
+export function CaddyDockerNoSSLs() {
+    return `# Proxy Reverso Caddy para o container Docker (127.0.0.1:8085) — Sem SSL
+# Substitua <domain> pelo seu domínio ou IP
+http://<domain> {
+    request_body {
+        max_size 100MB
+    }
+    reverse_proxy 127.0.0.1:8085
+}`;
 }
 
-export function CaddySSL({ jex = false }) {
+export function CaddyDockerSSLs() {
+    return `# Proxy Reverso Caddy para o container Docker (127.0.0.1:8085) — Com SSL Automático
+# Substitua <domain> pelo seu domínio
+<domain> {
+    request_body {
+        max_size 100MB
+    }
+    reverse_proxy 127.0.0.1:8085
+}`;
+}
+
+export function CaddyNoSSL({ jex = false, phpVersion = "8.1" }) {
     return (
-        <CodeBlock language="bash">{CaddySSLs(jex)}
-        </CodeBlock>
-    )
+        <CodeBlock language="bash">{CaddyNoSSLs(jex, phpVersion)}</CodeBlock>
+    );
+}
+
+export function CaddySSL({ jex = false, phpVersion = "8.1" }) {
+    return (
+        <CodeBlock language="bash">{CaddySSLs(jex, phpVersion)}</CodeBlock>
+    );
+}
+
+export function CaddyDockerNoSSL() {
+    return (
+        <CodeBlock language="bash">{CaddyDockerNoSSLs()}</CodeBlock>
+    );
+}
+
+export function CaddyDockerSSL() {
+    return (
+        <CodeBlock language="bash">{CaddyDockerSSLs()}</CodeBlock>
+    );
 }

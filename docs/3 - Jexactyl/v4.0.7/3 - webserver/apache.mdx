@@ -1,0 +1,49 @@
+---
+sidebar_position: 4
+---
+
+# Usando Apache
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { ApacheNoSSL, ApacheSSL } from '@site/src/components/Pages/Apache';
+
+:::warning Pacote PHP para Apache
+Ao usar Apache diretamente na máquina, certifique-se de ter instalado o módulo **`libapache2-mod-php8.4`**.
+:::
+
+## 1. Desativar Configuração Padrão
+
+```bash
+sudo a2dissite 000-default.conf
+```
+
+---
+
+## 2. Criar Arquivo `/etc/apache2/sites-available/panel.conf`
+
+```bash
+sudo nano /etc/apache2/sites-available/panel.conf
+```
+
+Substitua `<domain>` pelo seu domínio ou endereço IP:
+
+<Tabs>
+  <TabItem value="apache-ssl" label="Com SSL" default>
+    <ApacheSSL jex={true} />
+  </TabItem>
+  <TabItem value="apache-nossl" label="Sem SSL">
+    <ApacheNoSSL jex={true} />
+  </TabItem>
+</Tabs>
+
+---
+
+## 3. Ativar Módulos e Reiniciar o Apache
+
+```bash
+sudo ln -sf /etc/apache2/sites-available/panel.conf /etc/apache2/sites-enabled/panel.conf
+sudo a2enmod rewrite
+sudo a2enmod ssl
+sudo systemctl restart apache2
+```

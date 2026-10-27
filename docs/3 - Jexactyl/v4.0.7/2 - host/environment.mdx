@@ -1,0 +1,95 @@
+---
+sidebar_position: 4
+---
+
+# Configuração do Ambiente (Host)
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CodeBlock from '@theme/CodeBlock';
+
+## 1. Criar Arquivo `.env` e Instalar Dependências PHP
+
+Copie o arquivo `.env.example` para `.env` e instale os pacotes do Composer:
+
+```bash
+cd /var/www/jexactyl
+sudo cp .env.example .env
+sudo composer install --no-dev --optimize-autoloader
+```
+
+---
+
+## 2. Gerar Chave de Criptografia (`APP_KEY`)
+
+:::danger Proteja sua `APP_KEY`
+Esta chave criptografa tokens de sessão, credenciais e chaves de API no banco de dados. Nunca compartilhe esta chave e guarde um backup dela em local seguro.
+:::
+
+```bash
+sudo php artisan key:generate --force
+```
+
+---
+
+## 3. Configurar Ambiente e Banco de Dados
+
+Utilize os dois assistentes interativos abaixo para configurar a URL do painel, fuso horário (`America/Sao_Paulo`), driver de cache/sessão (`redis`) e conexão com o banco de dados:
+
+```bash
+sudo php artisan p:environment:setup
+sudo php artisan p:environment:database
+```
+
+:::info Idioma e Variáveis
+No arquivo `/var/www/jexactyl/.env`, certifique-se de que as variáveis abaixo estejam definidas:
+```dotenv
+APP_LOCALE=pt-BR
+APP_ENVIRONMENT_ONLY=false
+```
+:::
+
+---
+
+## 4. Executar Migrações do Banco de Dados
+
+Crie as tabelas do painel e popule os Nests & Eggs iniciais:
+
+```bash
+sudo php artisan migrate --seed --force
+```
+
+---
+
+## 5. Criar Conta de Administrador
+
+Crie o primeiro usuário administrador do painel via CLI:
+
+```bash
+sudo php artisan p:user:make
+```
+
+---
+
+## 6. Atribuir Permissões ao Servidor Web
+
+Ajuste o proprietário dos arquivos para o usuário do servidor web da sua distribuição:
+
+<Tabs>
+  <TabItem value="Ubuntu-Debian" label="Ubuntu / Debian" default>
+    <CodeBlock language="bash">
+{`# NGINX, Caddy ou Apache no Ubuntu/Debian
+sudo chmod -R 755 storage/* bootstrap/cache/
+sudo chown -R www-data:www-data /var/www/jexactyl/*`}
+    </CodeBlock>
+  </TabItem>
+  <TabItem value="RHEL-Rocky" label="RHEL / Rocky Linux / AlmaLinux">
+    <CodeBlock language="bash">
+{`# Se estiver usando NGINX
+sudo chown -R nginx:nginx /var/www/jexactyl/*
+
+# Se estiver usando Apache
+sudo chown -R apache:apache /var/www/jexactyl/*`}
+    </CodeBlock>
+  </TabItem>
+</Tabs>
