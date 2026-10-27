@@ -53,21 +53,10 @@ sudo cp /var/www/jexactyl/.env ~/env.host.bak
 Você pode clonar o projeto diretamente no diretório desejado (por exemplo, `/var/www/jexactyl-docker`):
 
 ```bash
-# O comando git clone cria automaticamente a pasta de destino (/var/www/jexactyl-docker)
 git clone https://github.com/Next-Panel/Jexactyl-BR.git /var/www/jexactyl-docker
 cd /var/www/jexactyl-docker
 cp .env.example .env
 ```
-
-:::tip Criação manual de pasta com mkdir
-Caso prefira criar a pasta manualmente antes de clonar, você pode executar:
-```bash
-mkdir -p /var/www/jexactyl-docker
-cd /var/www/jexactyl-docker
-git clone https://github.com/Next-Panel/Jexactyl-BR.git .
-cp .env.example .env
-```
-:::
 
 Abra o arquivo `.env` para edição (`nano .env`) e configure os campos:
 * **`APP_KEY`** e **`HASHIDS_SALT`**: Copie exatamente os mesmos valores salvos em `~/env.host.bak`.
