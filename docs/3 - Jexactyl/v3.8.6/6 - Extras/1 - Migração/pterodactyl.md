@@ -26,8 +26,11 @@ Você pode fazer isso executando os seguintes comandos:
 # Faz backup da estrutura do arquivo e da chave .env.
 sudo cp -R /var/www/pterodactyl /var/www/pterodactyl-backup
 
+# Carrega o nome do banco do .env para o terminal (sem trocar manualmente)
+export DB_DATABASE=$(grep -E '^DB_DATABASE=' /var/www/pterodactyl/.env | cut -d '=' -f2 | tr -d "\"' " | xargs)
+
 # Despeje o banco de dados MySQL e salve-o no diretório de backup.
-sudo mysqldump -u root -p panel > /var/www/pterodactyl-backup/panel.sql
+sudo mysqldump -u root -p "$DB_DATABASE" > /var/www/pterodactyl-backup/panel.sql
 ```
 
 ***

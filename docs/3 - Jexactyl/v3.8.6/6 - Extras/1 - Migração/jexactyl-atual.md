@@ -18,11 +18,14 @@ Você pode fazer isso executando os seguintes comandos:
 ## Se seu painel for Jexactyl use
 
 ```bash
+# Carrega o nome do banco do .env para o terminal (sem trocar manualmente)
+export DB_DATABASE=$(grep -E '^DB_DATABASE=' /var/www/jexactyl/.env | cut -d '=' -f2 | tr -d "\"' " | xargs)
+
 # renomear a estrutura original da jexactyl.
 sudo mv /var/www/jexactyl /var/www/jexactyl-backup
 
 # Despeje o banco de dados MySQL e salve-o no diretório de backup.
-sudo mysqldump -u root -p panel > /var/www/jexactyl-backup/panel.sql
+sudo mysqldump -u root -p "$DB_DATABASE" > /var/www/jexactyl-backup/panel.sql
 
 # Crie e entre na pasta onde novo diretório do jexactyl-brasil.
 sudo mkdir /var/www/jexactyl
@@ -34,12 +37,14 @@ sudo cp /var/www/jexactyl-backup/.env /var/www/jexactyl/
 ## Se seu painel for Pterodactyl use
 
 ```bash
+# Carrega o nome do banco do .env para o terminal (sem trocar manualmente)
+export DB_DATABASE=$(grep -E '^DB_DATABASE=' /var/www/pterodactyl/.env | cut -d '=' -f2 | tr -d "\"' " | xargs)
 
 # renomear a estrutura original do pterodactyl.
 sudo mv /var/www/pterodactyl /var/www/pterodactyl-backup
 
 # Despeje o banco de dados MySQL e salve-o no diretório de backup.
-sudo mysqldump -u root -p panel > /var/www/pterodactyl-backup/panel.sql
+sudo mysqldump -u root -p "$DB_DATABASE" > /var/www/pterodactyl-backup/panel.sql
 
 # Crie e entre na pasta onde novo diretório do jexactyl-brasil.
 sudo mkdir /var/www/pterodactyl

@@ -30,10 +30,11 @@ sudo systemctl stop panel.service
 # sudo systemctl stop pteroq.service
 # sudo systemctl stop ptero.service
 
-# 2. Exportar o banco de dados atual do painel (descubra o nome em /var/www/jexactyl/.env, na chave DB_DATABASE; substitua jexactyl pelo nome do seu banco se for diferente)
-mariadb-dump -u root -p jexactyl > ~/painel-backup.sql
+# 2. Exportar o banco de dados atual do painel (carrega o nome direto do .env, sem trocar manualmente)
+export DB_DATABASE=$(grep -E '^DB_DATABASE=' /var/www/jexactyl/.env | cut -d '=' -f2 | tr -d "\"' " | xargs)
+mariadb-dump -u root -p "$DB_DATABASE" > ~/painel-backup.sql
 # Se o comando não existir, tente:
-# mysqldump -u root -p jexactyl > ~/painel-backup.sql
+# mysqldump -u root -p "$DB_DATABASE" > ~/painel-backup.sql
 
 # 3. Validar a integridade do dump gerado
 tail -n 5 ~/painel-backup.sql
@@ -326,3 +327,51 @@ sudo crontab -e
 # (Opcional) Dumps em intervalos menores (ex: a cada 40 minutos)
 */40 * * * * docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup.sql
 ```
+
+---
+
+## 8. Solução de Problemas: Boot Loop `1050 Table Already Exists`
+
+Se o painel veio de uma linhagem antiga (ex.: `/var/www/jexactyl` ou `/var/www/pterodactyl` com histórico de migrations diferente do código atual), o primeiro boot do container `panel` pode entrar em loop com:
+
+```
+SQLSTATE[42S01]: Base table or view already exists: 1050 Table '...' already exists
+```
+
+Causa: a tabela `migrations` importada registra os nomes antigos; os arquivos novos com outro nome tentam recriar tabelas que já existem. O procedimento abaixo marca como executadas somente as migrations cujo efeito já existe, deixando as demais rodarem normalmente:
+
+```bash
+cd /var/www/jexactyl-docker
+docker compose stop panel
+
+# Repita até ver "Nothing to migrate": cada rodada aplica o que falta
+# e para na próxima migration conflitante
+docker compose run --rm --no-deps panel php artisan migrate --force
+```
+
+Para cada migration que falhar com `already exists` / `Duplicate column` (e somente nesses casos), marque-a como executada — primeiro confira que a tabela/coluna realmente existe:
+
+```bash
+# Exemplo: confere a tabela e marca a migration como executada
+docker compose exec -T database sh -c 'mariadb -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SHOW COLUMNS FROM admin_roles;"'
+docker compose exec -T database sh -c 'mariadb -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "INSERT INTO migrations (migration, batch) VALUES ('"'"'2020_09_25_021109_create_admin_roles_table'"'"', (SELECT * FROM (SELECT COALESCE(MAX(batch),0)+1 FROM migrations) t));"'
+```
+
+Se a falha for de outro tipo (ex.: `1091 Can't DROP COLUMN`), compare a migration com a tabela real: quando o estado final já existe (coluna a adicionar já presente, coluna a remover já ausente), marcar como executada é seguro; caso contrário, pare e investigue antes de continuar.
+
+```bash
+# Quando terminar, suba o painel normalmente
+docker compose up -d panel
+docker compose logs -f panel
+```
+
+:::warning Backup de reversão
+Antes de importar, faça cópia nível-arquivo do volume do banco (não exige senha):
+
+```bash
+docker volume create backup-pre-migracao
+docker run --rm -v jexactyl_db-data:/from:ro -v backup-pre-migracao:/to ubuntu:22.04 cp -a /from/. /to/
+```
+
+Para reverter: pare `panel` e `database`, copie de volta (`/from` = backup, `/to` = `jexactyl_db-data`) e suba tudo.
+:::

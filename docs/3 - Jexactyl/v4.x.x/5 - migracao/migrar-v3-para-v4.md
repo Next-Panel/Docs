@@ -44,18 +44,13 @@ cd /var/www/jexactyl
 sudo php artisan down
 ```
 
-Descubra o nome do banco configurado no `.env`:
+Carrega o nome do banco direto do `.env` para o terminal e faz o backup (não precisa trocar manualmente). O backup deve ficar fora de `/var/www`, por exemplo em `~/` ou `/backups/`:
 
 ```bash
-grep DB_DATABASE /var/www/jexactyl/.env
-```
-
-O valor padrão nas instalações é `panel`. Substitua abaixo se o seu for diferente. O backup deve ficar fora de `/var/www`, por exemplo em `~/` ou `/backups/`:
-
-```bash
-mariadb-dump -u root -p panel > ~/jexactyl-v3-backup.sql
+export DB_DATABASE=$(grep -E '^DB_DATABASE=' /var/www/jexactyl/.env | cut -d '=' -f2 | tr -d "\"' " | xargs)
+mariadb-dump -u root -p "$DB_DATABASE" > ~/jexactyl-v3-backup.sql
 # Se o comando não existir, tente:
-# mysqldump -u root -p panel > ~/jexactyl-v3-backup.sql
+# mysqldump -u root -p "$DB_DATABASE" > ~/jexactyl-v3-backup.sql
 ```
 
 Valide o dump antes de continuar:
