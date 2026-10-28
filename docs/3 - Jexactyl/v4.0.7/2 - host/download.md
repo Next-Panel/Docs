@@ -21,14 +21,15 @@ cd /var/www/jexactyl
 
 ## 2. Baixar o Painel
 
-Baixe o pacote de release (`panel.tar.gz`) contendo o painel já traduzido e com os overlays aplicados, extraia os arquivos e ajuste as permissões de escrita dos diretórios `storage` e `bootstrap/cache`:
+Baixe o pacote de release (`panel.tar.gz`) contendo o painel já traduzido e com os overlays aplicados, extraia os arquivos e ajuste o proprietário e as permissões de escrita dos diretórios `storage` e `bootstrap/cache`:
 
 <Tabs>
   <TabItem value="jexactyl-br" label="Jexactyl Brasil" default>
     <CodeBlock language="bash">
-{`# Jexactyl Brasil (NextPanel)
+{`# Jexactyl Brasil (Next-Panel)
 sudo curl -Lo panel.tar.gz https://github.com/Next-Panel/Jexactyl-BR/releases/latest/download/panel.tar.gz
-sudo tar -xzvf panel.tar.gz
+sudo tar -xzf panel.tar.gz
+sudo chown -R www-data:www-data /var/www/jexactyl
 sudo chmod -R 755 storage/* bootstrap/cache/`}
     </CodeBlock>
   </TabItem>
@@ -36,8 +37,11 @@ sudo chmod -R 755 storage/* bootstrap/cache/`}
     <CodeBlock language="bash">
 {`# Jexpanel / Jexactyl Original (Inglês)
 sudo curl -Lo panel.tar.gz https://github.com/Jexactyl/Jexactyl/releases/latest/download/panel.tar.gz
-sudo tar -xzvf panel.tar.gz
+sudo tar -xzf panel.tar.gz
+sudo chown -R www-data:www-data /var/www/jexactyl
 sudo chmod -R 755 storage/* bootstrap/cache/`}
     </CodeBlock>
   </TabItem>
 </Tabs>
+
+

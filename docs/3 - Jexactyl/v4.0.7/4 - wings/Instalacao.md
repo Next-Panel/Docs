@@ -60,6 +60,10 @@ sudo chmod u+x /usr/local/bin/wings
 Se o seu painel Jexactyl estiver em HTTPS (`https://...`), o FQDN do Wings também deve possuir certificado SSL válido (`/etc/letsencrypt/live/<fqdn>/fullchain.pem`) e conexão `https` configurada no nó.
 :::
 
+:::info Coexistência com o painel em Docker
+O Wings escuta nas portas `8080` (daemon) e `2022` (SFTP). O painel Jexactyl em Docker publica por padrão a porta `8085`, portanto não há conflito entre eles. A migração ou reinstalação do painel não altera `/var/lib/pterodactyl/volumes/` — os arquivos dos servidores permanecem nos nós.
+:::
+
 ---
 
 ## 5. Testar e Ativar o Serviço `wings.service`
@@ -101,5 +105,6 @@ WantedBy=multi-user.target
 Ative e inicie o serviço:
 
 ```bash
+sudo systemctl daemon-reload
 sudo systemctl enable --now wings
 ```

@@ -8,38 +8,28 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import { ApacheNoSSL, ApacheSSL } from '@site/src/components/Pages/Apache';
 
+<Tabs>
+  <TabItem value="host" label="Maquina Host" default>
+
 :::warning Pacote PHP para Apache
 Ao usar Apache diretamente na máquina, certifique-se de ter instalado o módulo **`libapache2-mod-php8.4`**.
 :::
 
-## 1. Desativar Configuração Padrão
-
 ```bash
 sudo a2dissite 000-default.conf
-```
-
----
-
-## 2. Criar Arquivo `/etc/apache2/sites-available/panel.conf`
-
-```bash
 sudo nano /etc/apache2/sites-available/panel.conf
 ```
 
 Substitua `<domain>` pelo seu domínio ou endereço IP:
 
-<Tabs>
-  <TabItem value="apache-ssl" label="Com SSL" default>
+<Tabs groupId="ssl">
+  <TabItem value="ssl" label="Com SSL" default>
     <ApacheSSL jex={true} />
   </TabItem>
-  <TabItem value="apache-nossl" label="Sem SSL">
+  <TabItem value="nossl" label="Sem SSL">
     <ApacheNoSSL jex={true} />
   </TabItem>
 </Tabs>
-
----
-
-## 3. Ativar Módulos e Reiniciar o Apache
 
 ```bash
 sudo ln -sf /etc/apache2/sites-available/panel.conf /etc/apache2/sites-enabled/panel.conf
@@ -47,3 +37,38 @@ sudo a2enmod rewrite
 sudo a2enmod ssl
 sudo systemctl restart apache2
 ```
+
+  </TabItem>
+  <TabItem value="docker" label="Docker">
+
+Se você subiu o painel via Docker com `PANEL_PORT=127.0.0.1:8085`, crie `/etc/apache2/sites-available/jexactyl.conf`:
+
+```apache
+<VirtualHost *:80>
+    ServerName <domain>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName <domain>
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/<domain>/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/<domain>/privkey.pem
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto "https"
+    ProxyPass / http://127.0.0.1:8085/
+    ProxyPassReverse / http://127.0.0.1:8085/
+</VirtualHost>
+```
+
+```bash
+sudo a2enmod proxy proxy_http proxy_wstunnel rewrite ssl headers
+sudo a2ensite jexactyl.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+
+  </TabItem>
+</Tabs>

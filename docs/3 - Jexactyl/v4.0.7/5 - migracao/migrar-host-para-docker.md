@@ -4,6 +4,9 @@ sidebar_position: 2
 
 # Migrar da Máquina (Host) para Docker
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 Se você possui o painel instalado diretamente na máquina (`/var/www/jexactyl` ou `/var/www/pterodactyl`) e deseja migrar para a stack **Docker Compose** oficial, siga o passo a passo simplificado e seguro abaixo.
 
 :::info Coexistência Segura com o Host
@@ -23,12 +26,13 @@ Antes de exportar os dados, pause o worker de filas para evitar novas escritas:
 ```bash
 # 1. Parar temporariamente o serviço de filas do painel no host
 sudo systemctl stop panel.service
-# Caso sua instalação anterior ainda utilize o nome legado do Pterodactyl:
+# Se não funcionar, tente:
 # sudo systemctl stop pteroq.service
+# sudo systemctl stop ptero.service
 
-# 2. Exportar o banco de dados atual do painel (substitua jexactyl pelo nome do seu banco atual se for diferente)
+# 2. Exportar o banco de dados atual do painel (descubra o nome em /var/www/jexactyl/.env, na chave DB_DATABASE; substitua jexactyl pelo nome do seu banco se for diferente)
 mariadb-dump -u root -p jexactyl > ~/painel-backup.sql
-# Caso utilize o utilitário mysqldump:
+# Se o comando não existir, tente:
 # mysqldump -u root -p jexactyl > ~/painel-backup.sql
 
 # 3. Validar a integridade do dump gerado
@@ -53,7 +57,8 @@ sudo cp /var/www/jexactyl/.env ~/env.host.bak
 Você pode clonar o projeto diretamente no diretório desejado (por exemplo, `/var/www/jexactyl-docker`):
 
 ```bash
-git clone https://github.com/Next-Panel/Jexactyl-BR.git /var/www/jexactyl-docker
+sudo git clone https://github.com/Next-Panel/Jexactyl-BR.git /var/www/jexactyl-docker
+sudo chown -R $(id -un):$(id -gn) /var/www/jexactyl-docker
 cd /var/www/jexactyl-docker
 cp .env.example .env
 ```
@@ -70,12 +75,6 @@ Abra o arquivo `.env` para edição (`nano .env`) e configure os campos:
 
 ## 3. Subir o Banco no Docker e Importar o Backup
 
-:::important Credenciais do Novo Banco no Docker
-As credenciais usadas no comando abaixo (`<DB_USERNAME>`, `<DB_PASSWORD>` e `<DB_DATABASE>`) são referentes ao **novo banco de dados MariaDB criado pelo Docker** (definidas no arquivo `.env` do Compose).
-* Você pode manter o mesmo nome de banco, usuário e senha que utilizava na instalação antiga, ou definir novas credenciais para o Docker.
-* **Caso escolha credenciais diferentes das antigas**, certifique-se de que correspondam exatamente às que você configurou no seu `.env` do Docker Compose (`DB_USERNAME`, `DB_PASSWORD` e `DB_DATABASE`).
-:::
-
 Inicie primeiro os serviços de banco e cache:
 
 ```bash
@@ -88,11 +87,16 @@ docker compose ps
 
 Assim que o container `database` estiver com status `(healthy)`, importe o dump:
 
-```bash
-docker compose exec -T database mariadb -u<DB_USERNAME> -p<DB_PASSWORD> <DB_DATABASE> < ~/painel-backup.sql
+:::important Não substitua os `$` manualmente
+Cole o comando exatamente como está. As variáveis `$MYSQL_USER`, `$MYSQL_PASSWORD` e `$MYSQL_DATABASE` **não são do seu terminal** — elas existem **dentro** do container `database` (vêm do seu `.env`: `DB_USERNAME` / `DB_PASSWORD` / `DB_DATABASE`). As aspas simples por fora impedem o seu shell de expandir; as aspas duplas por dentro deixam o `sh` do container expandir. Nada para trocar à mão.
+:::
 
-# Valide se os registros foram importados com sucesso:
-docker compose exec -T database mariadb -u<DB_USERNAME> -p<DB_PASSWORD> -e "SELECT count(*) as total_users FROM users; SELECT count(*) as total_servers FROM servers;" <DB_DATABASE>
+```bash
+docker compose exec -T database sh -c 'mariadb -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < ~/painel-backup.sql
+
+# Valide a importação:
+docker compose exec -T database sh -c 'mariadb -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SELECT COUNT(*) FROM users;"'
+docker compose exec -T database sh -c 'mariadb -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SELECT COUNT(*) FROM servers;"'
 ```
 
 ---
@@ -111,9 +115,84 @@ Durante a inicialização do container `panel`, o entrypoint executará automati
 
 ---
 
-## 5. Virar o Tráfego no Servidor Web (Caddy / Nginx)
+## 5. Desativar a Rota Antiga do Host
 
-No **Caddy**, crie ou edite `/etc/caddy/conf.d/painel.caddy`:
+:::warning Desative a rota antiga do Host
+Desative a rota antiga que servia `/var/www/jexactyl` ou `/var/www/pterodactyl` (PHP-FPM) no Apache, Caddy ou Nginx. Manter as duas ativas causa conflito: o servidor web continua entregando o painel antigo em vez do container em `127.0.0.1:8085`.
+:::
+
+<Tabs>
+  <TabItem value="caddy" label="Caddy" default>
+
+Remova ou comente o bloco antigo que apontava para o PHP-FPM em `/etc/caddy/Caddyfile` (ou em `/etc/caddy/conf.d/painel.caddy`):
+
+```bash
+sudo nano /etc/caddy/Caddyfile
+```
+
+Apague ou comente o bloco parecido com:
+
+```caddy
+# painel.seudominio.com.br {
+#     root * /var/www/jexactyl/public
+#     php_fastcgi unix//run/php/php8.1-fpm.sock
+#     file_server
+# }
+```
+
+Valide que não restou rota do Host:
+
+```bash
+sudo grep -rn "var/www/jexactyl\|var/www/pterodactyl\|php.*fpm.sock" /etc/caddy/Caddyfile /etc/caddy/conf.d/ 2>/dev/null || echo "sem rota antiga"
+```
+
+  </TabItem>
+  <TabItem value="nginx" label="Nginx">
+
+Remova o link do site antigo que servia `/var/www`:
+
+```bash
+sudo rm -f /etc/nginx/sites-enabled/panel.conf /etc/nginx/sites-enabled/jexactyl.conf /etc/nginx/sites-enabled/default
+sudo rm -f /etc/nginx/sites-enabled/pterodactyl.conf
+sudo nginx -t
+```
+
+Confirme que não restou `root /var/www`:
+
+```bash
+sudo grep -rn "var/www/jexactyl\|var/www/pterodactyl" /etc/nginx/sites-enabled/ /etc/nginx/conf.d/ 2>/dev/null || echo "sem rota antiga"
+```
+
+  </TabItem>
+  <TabItem value="apache" label="Apache">
+
+Desative o site antigo que servia `/var/www`:
+
+```bash
+sudo a2dissite panel.conf
+sudo a2dissite jexactyl.conf
+sudo a2dissite pterodactyl.conf
+sudo apache2ctl configtest
+```
+
+Confirme que não restou `DocumentRoot /var/www`:
+
+```bash
+sudo grep -rn "var/www/jexactyl\|var/www/pterodactyl" /etc/apache2/sites-enabled/ 2>/dev/null || echo "sem rota antiga"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## 6. Configurar o Proxy Reverso
+
+Selecione abaixo o servidor web instalado na sua máquina para apontar as requisições para a porta interna do container (`127.0.0.1:8085`):
+
+<Tabs>
+  <TabItem value="caddy" label="Caddy" default>
+    <p>Adicione ou edite o bloco do painel em <code>/etc/caddy/Caddyfile</code> (ou <code>/etc/caddy/conf.d/painel.caddy</code>):</p>
 
 ```caddy
 painel.seudominio.com.br {
@@ -124,33 +203,126 @@ painel.seudominio.com.br {
 }
 ```
 
-Recarregue o Caddy:
+    <p>Valide e recarregue o Caddy:</p>
 
 ```bash
-sudo caddy validate --config /etc/caddy/Caddyfile
+sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 sudo systemctl reload caddy
 ```
+  </TabItem>
 
-Caso utilize **Nginx**, aponte a diretiva `proxy_pass http://127.0.0.1:8085;` no bloco de configuração do site e recarregue o serviço com `sudo systemctl reload nginx`.
+  <TabItem value="nginx" label="Nginx">
+    <p>Crie ou edite o arquivo de configuração em <code>/etc/nginx/sites-available/jexactyl.conf</code>:</p>
+
+```nginx
+server {
+    listen 80;
+    server_name painel.seudominio.com.br;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name painel.seudominio.com.br;
+
+    ssl_certificate /etc/letsencrypt/live/painel.seudominio.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/painel.seudominio.com.br/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    client_max_body_size 100m;
+
+    location / {
+        proxy_pass http://127.0.0.1:8085;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 300s;
+    }
+}
+```
+
+    <p>Ative o site e recarregue o Nginx:</p>
+
+```bash
+sudo ln -sf /etc/nginx/sites-available/jexactyl.conf /etc/nginx/sites-enabled/jexactyl.conf
+sudo nginx -t
+sudo systemctl reload nginx
+```
+  </TabItem>
+
+  <TabItem value="apache" label="Apache">
+    <p>Certifique-se de habilitar os módulos necessários:</p>
+
+```bash
+sudo a2enmod proxy proxy_http proxy_wstunnel rewrite ssl headers
+```
+
+    <p>Crie ou edite <code>/etc/apache2/sites-available/jexactyl.conf</code>:</p>
+
+```apache
+<VirtualHost *:80>
+    ServerName painel.seudominio.com.br
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName painel.seudominio.com.br
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/painel.seudominio.com.br/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/painel.seudominio.com.br/privkey.pem
+
+    LimitRequestBody 104857600
+
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Forwarded-Port "443"
+
+    ProxyPass / http://127.0.0.1:8085/
+    ProxyPassReverse / http://127.0.0.1:8085/
+</VirtualHost>
+```
+
+    <p>Ative a configuração e recarregue o Apache:</p>
+
+```bash
+sudo a2ensite jexactyl.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+  </TabItem>
+</Tabs>
 
 Por fim, desative o serviço de fila legado do host para não consumir recursos desnecessários da máquina:
 
 ```bash
 sudo systemctl disable --now panel.service
-# Caso sua instalação anterior ainda utilize o nome legado do Pterodactyl:
+# Se não funcionar, tente:
 # sudo systemctl disable --now pteroq.service
+# sudo systemctl disable --now ptero.service
 ```
 
 ---
 
-## 6. Configurar Backup Periódico no Crontab
+## 7. Configurar Backup Periódico no Crontab
 
-Atualize sua rotina de backup no `crontab` do sistema (`sudo crontab -e`). Usando `sudo`, o comando executa o dump aproveitando diretamente as variáveis de ambiente que o container já possui carregadas do `.env`, sem a necessidade de expor ou digitar senhas no agendador:
+Crie o diretório de destino e edite o `crontab` do root:
+
+```bash
+sudo mkdir -p /backups/databases
+sudo crontab -e
+```
 
 ```cron
 # Backup diário do banco do Docker à meia-noite (00:00)
-0 0 * * * sudo docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup-$(date +\%F).sql
+0 0 * * * docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup-$(date +\%F).sql
 
 # (Opcional) Dumps em intervalos menores (ex: a cada 40 minutos)
-*/40 * * * * sudo docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup.sql
+*/40 * * * * docker compose -f /var/www/jexactyl-docker/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup.sql
 ```

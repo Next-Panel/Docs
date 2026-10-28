@@ -8,13 +8,13 @@ Para armazenar as configurações de usuários, servidores, planos e faturas, cr
 
 ## Criando o Banco e Usuário
 
-Acesse o terminal do MariaDB/MySQL como `root`:
+Acesse o terminal do MariaDB como `root` (a autenticação usa o `socket` do sistema, por isso não é preciso senha):
 
 ```bash
-sudo mysql -u root -p
+sudo mariadb
 ```
 
-Execute os comandos SQL abaixo (substituindo `SuaSenhaForteAqui` por uma senha segura):
+Execute os comandos SQL abaixo. Troque `SuaSenhaForteAqui` por uma senha forte e exclusiva para o painel, pois ela será usada no arquivo `.env`:
 
 ```sql
 CREATE USER 'jexactyl'@'127.0.0.1' IDENTIFIED BY 'SuaSenhaForteAqui';

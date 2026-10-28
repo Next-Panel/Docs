@@ -52,13 +52,14 @@ DB_PASSWORD=troque_esta_senha_segura
 DB_ROOT_PASSWORD=troque_esta_senha_root_segura
 
 # Conta de Administrador criada automaticamente no primeiro boot
+# (em migração com banco existente, deixe EMAIL e PASSWORD em branco)
 PANEL_ADMIN_EMAIL=admin@seudominio.com.br
 PANEL_ADMIN_PASSWORD=SuaSenhaForteAqui123!
 PANEL_ADMIN_USERNAME=admin
 ```
 
 :::info Acesso direto sem Proxy Reverso
-Se estiver testando localmente ou acessando direto por `http://SEU_IP:8085` sem Caddy/Nginx na frente, mantenha `PANEL_PORT=8085` e `APP_URL=http://SEU_IP:8085`.
+Atrás de Caddy/Nginx, mantenha `PANEL_PORT=127.0.0.1:8085`. Se estiver testando localmente ou acessando direto por `http://SEU_IP:8085` sem proxy reverso na frente, use `PANEL_PORT=8085` e `APP_URL=http://SEU_IP:8085`.
 :::
 
 ---
@@ -95,17 +96,22 @@ docker compose exec panel php artisan p:user:make
 # Parar os containers (mantendo os dados salvos nos volumes)
 docker compose down
 
-# Gerar dump manual do banco de dados na pasta backups/
-docker compose exec -T database mariadb-dump -u$DB_USERNAME -p$DB_PASSWORD $DB_DATABASE > ./backups/jexactyl_backup_$(date +%Y%m%d_%H%M%S).sql
+# Gerar dump manual do banco de dados na pasta backups/ (reaproveita as credenciais do .env via container)
+docker compose exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > ./backups/jexactyl_backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Configurar Backup Automático no Crontab
 
-Para automatizar backups diários ou periódicos do banco de dados para uma pasta no host (ex: `/backups/databases/`), adicione a linha abaixo ao `crontab` do servidor (`sudo crontab -e`):
+Para automatizar backups diários do banco de dados para uma pasta no host (ex: `/backups/databases/`), crie o diretório e edite o `crontab` do root:
+
+```bash
+sudo mkdir -p /backups/databases
+sudo crontab -e
+```
 
 ```cron
-# Gera backup diário do banco do Docker à meia-noite (substitua o caminho do compose, usuário e senha)
-0 0 * * * docker compose -f /var/www/Jexactyl-BR/docker-compose.yml exec -T database mariadb-dump -ujexactyl -pSUA_SENHA jexactyl > /backups/databases/jexactyl-backup-$(date +\%F).sql
+# Backup diário do banco do Docker à meia-noite (reaproveita DB_DATABASE/DB_USERNAME/DB_PASSWORD do .env via container)
+0 0 * * * docker compose -f /var/www/Jexactyl-BR/docker-compose.yml exec -T database sh -c 'mariadb-dump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > /backups/databases/jexactyl-backup-$(date +\%F).sql
 
 # (Opcional) Remove backups com mais de 7 dias automaticamente
 0 1 * * * find /backups/databases/*-backup-* -mtime +7 -delete

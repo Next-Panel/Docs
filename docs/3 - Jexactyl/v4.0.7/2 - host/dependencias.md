@@ -12,15 +12,15 @@ Recomendamos a **[Instalação via Docker](/docs/Jexactyl/v4.0.7/docker/subida-r
 
 | Sistema Operacional | Versão | Suportado? | Observações |
 | :--- | :--- | :---: | :--- |
-| **Ubuntu** | `22.04 LTS` / `24.04 LTS` | ✅ | Comandos abaixo baseados no Ubuntu 22.04/24.04. |
-| **Debian** | `11` / `12` | ✅ | Requer o repositório Sury para pacotes `php8.4`. |
+| **Ubuntu** | `22.04 LTS` / `24.04 LTS` | Sim | Comandos abaixo baseados no Ubuntu 22.04/24.04. |
+| **Debian** | `11` / `12` | Sim | Requer o repositório Sury para pacotes `php8.4`. |
 
 ## Dependências Necessárias
 
 * **PHP `8.4`** (versão `>= 8.4.27` para mitigação do **PHP2Shell**: CVE-2026-109618 / CVE-2026-109619) com as extensões: `common`, `cli`, `gd`, `mysql`, `mbstring`, `bcmath`, `xml`, `fpm`, `curl`, `zip`.
 * **MariaDB `10.6+` / `11.x`** (ou MySQL `8.0+`).
 * **Redis** (`redis-server`).
-* **Servidor Web**: `Nginx` (recomendado), `Caddy` ou `Apache`.
+* **Servidor Web**: `Nginx` (recomendado) ou `Caddy`.
 * **Utilitários**: `curl`, `tar`, `unzip`, `git` e `composer` v2.
 
 ---
@@ -41,6 +41,7 @@ sudo chmod 644 /usr/share/keyrings/redis-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
 
 # 4. Atualizar lista de pacotes e instalar PHP 8.4, MariaDB, Nginx e Redis
+# Se preferir Caddy, instale `caddy` no lugar de `nginx`.
 sudo apt update
 sudo apt -y install php8.4 php8.4-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server
 

@@ -81,9 +81,13 @@ Como etapa final, reinicie o trabalhador da fila e traga o painel
 novamente on-line para que os usuários possam experimentar o que há de mais recente.
 
 ```bash
-sudo systemctl restart panel.service # Replace 'panel' with 'pteroq' if you have migrated
+sudo systemctl restart panel.service
 sudo php artisan up
 ```
+
+:::info Nome do serviço por painel
+O **Jexactyl** usa `panel.service` como padrão. O **Pterodactyl** usa `pteroq.service` como padrão oficial. Se você manteve o nome do Pterodactyl, troque `panel` por `pteroq` no comando acima. `ptero.service` (sem `q`) é o nome legado.
+:::
 
 :::info Informação
 Algum problema? Entre em contato conosco em [Discord](https://discord.gg/8r7n7mU33R).

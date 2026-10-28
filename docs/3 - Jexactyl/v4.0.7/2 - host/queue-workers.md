@@ -6,7 +6,7 @@ sidebar_position: 5
 
 ## 1. Configurar Crontab
 
-Adicione a tarefa agendada do Laravel (`schedule:run`) ao `crontab` do sistema para que o painel processe limpezas de sessão, renovações e rotinas automáticas a cada minuto:
+Adicione a tarefa agendada do Laravel (`schedule:run`) ao `crontab` para que o painel processe limpezas de sessão, renovações e rotinas automáticas a cada minuto:
 
 ```bash
 sudo crontab -e
@@ -33,6 +33,9 @@ Cole o conteúdo abaixo:
 ```ini
 # Jexactyl v4 Queue Worker File
 # ----------------------------------
+# Jexactyl v4 usa panel.service como padrão.
+# No Pterodactyl oficial o padrão é pteroq.service.
+# ptero.service (sem q) é nome legado, não use em instalações novas.
 
 [Unit]
 Description=Jexactyl Queue Worker
@@ -55,9 +58,10 @@ WantedBy=multi-user.target
 
 ## 3. Ativar o Redis e o Queue Worker
 
-Habilite os serviços para iniciarem junto com o sistema:
+Recarregue o `systemd` e habilite os serviços para iniciarem junto com o sistema:
 
 ```bash
+sudo systemctl daemon-reload
 sudo systemctl enable --now redis-server
 sudo systemctl enable --now panel.service
 ```

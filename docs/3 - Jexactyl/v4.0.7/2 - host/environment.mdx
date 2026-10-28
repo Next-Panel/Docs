@@ -79,17 +79,17 @@ Ajuste o proprietário dos arquivos para o usuário do servidor web da sua distr
   <TabItem value="Ubuntu-Debian" label="Ubuntu / Debian" default>
     <CodeBlock language="bash">
 {`# NGINX, Caddy ou Apache no Ubuntu/Debian
-sudo chmod -R 755 storage/* bootstrap/cache/
-sudo chown -R www-data:www-data /var/www/jexactyl/*`}
+sudo chown -R www-data:www-data /var/www/jexactyl
+sudo chmod -R 755 storage/* bootstrap/cache/`}
     </CodeBlock>
   </TabItem>
   <TabItem value="RHEL-Rocky" label="RHEL / Rocky Linux / AlmaLinux">
     <CodeBlock language="bash">
 {`# Se estiver usando NGINX
-sudo chown -R nginx:nginx /var/www/jexactyl/*
+sudo chown -R nginx:nginx /var/www/jexactyl
 
 # Se estiver usando Apache
-sudo chown -R apache:apache /var/www/jexactyl/*`}
+sudo chown -R apache:apache /var/www/jexactyl`}
     </CodeBlock>
   </TabItem>
 </Tabs>

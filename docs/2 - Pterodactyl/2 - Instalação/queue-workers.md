@@ -17,7 +17,7 @@ sudo crontab -e
 
 Em seguida, cole essa linha para adicionar o Cron de tarefas da pterodactyl.
 
-```bash
+```cron
 * * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1
 ```
 
@@ -33,12 +33,13 @@ sudo nano /etc/systemd/system/pteroq.service
 ```
 Após isso, cole o texto abaixo dentro do arquivo que acabamos de criar.
 
-```bash
+```ini
 # Pterodactyl Queue Worker File
 # ----------------------------------
 
 [Unit]
 Description=Pterodactyl Queue Worker
+After=redis-server.service
 
 [Service]
 User=www-data
@@ -54,8 +55,12 @@ WantedBy=multi-user.target
 ```
 
 ### Ativar Queue Worker
-Por fim, ative o serviço do painel pterodactyl que acabamos de criar, bem como o serviço redis, para iniciar e executar na inicialização.
+Por fim, ative o Redis e o serviço de fila para iniciarem junto com o sistema (nesta ordem).
 ```bash
-sudo systemctl enable --now pteroq.service
 sudo systemctl enable --now redis-server
+sudo systemctl enable --now pteroq.service
 ```
+
+:::info Nome do serviço por painel
+O **Jexactyl v4** usa `panel.service` como padrão. O **Pterodactyl** usa `pteroq.service` como padrão oficial. `ptero.service` (sem `q`) é o nome legado — considere-o apenas se a sua instalação antiga ainda referencia esse nome.
+:::

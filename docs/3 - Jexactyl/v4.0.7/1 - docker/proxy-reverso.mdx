@@ -19,11 +19,12 @@ Para usar **Caddy** ou **Nginx** instalados na máquina sem **conflito de portas
 
 ---
 
-## Opção A: Usando Caddy (`/etc/caddy/Caddyfile`)
+<Tabs>
+  <TabItem value="caddy" label="Caddy" default>
 
 Abra o arquivo `/etc/caddy/Caddyfile` e adicione o bloco correspondente ao seu cenário (substituindo `<domain>` pelo seu domínio ou endereço IP):
 
-<Tabs>
+<Tabs groupId="ssl">
   <TabItem value="caddy-ssl" label="Com Certificado SSL Automático (HTTPS)" default>
     <p><em>No <code>.env</code>, defina <code>APP_URL=https://&lt;domain&gt;</code>:</em></p>
     <CaddyDockerSSL />
@@ -40,9 +41,8 @@ Recarregue o Caddy para aplicar:
 sudo systemctl reload caddy
 ```
 
----
-
-## Opção B: Usando Nginx (`/etc/nginx/sites-available/jexactyl.conf`)
+  </TabItem>
+  <TabItem value="nginx" label="Nginx">
 
 Caso utilize **Com Certificado SSL**, gere antes o certificado Let's Encrypt com o Certbot (`sudo apt install -y certbot python3-certbot-nginx && sudo certbot certonly --nginx -d <domain>`).
 
@@ -54,7 +54,7 @@ sudo nano /etc/nginx/sites-available/jexactyl.conf
 
 Cole uma das configurações abaixo (substituindo `<domain>` pelo seu domínio ou IP):
 
-<Tabs>
+<Tabs groupId="ssl">
   <TabItem value="nginx-ssl" label="Com Certificado SSL (HTTPS)" default>
     <p><em>No <code>.env</code>, defina <code>APP_URL=https://&lt;domain&gt;</code>:</em></p>
     <NginxDockerSSL />
@@ -71,3 +71,6 @@ Ative o site e recarregue o Nginx:
 sudo ln -sf /etc/nginx/sites-available/jexactyl.conf /etc/nginx/sites-enabled/jexactyl.conf
 sudo nginx -t && sudo systemctl reload nginx
 ```
+
+  </TabItem>
+</Tabs>

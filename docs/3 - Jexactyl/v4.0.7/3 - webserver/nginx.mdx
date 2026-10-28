@@ -8,24 +8,8 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import { NginxNoSSL, NginxSSL, NginxDockerNoSSL, NginxDockerSSL } from '@site/src/components/Pages/Nginx';
 
-Escolha abaixo se você instalou o painel **via Docker** ou **diretamente na máquina (PHP 8.4-FPM)**:
-
-## Opção 1: Nginx como Proxy Reverso para Docker (Recomendado)
-
-Se você subiu o painel via Docker com `PANEL_PORT=127.0.0.1:8085` e `TRUSTED_PROXIES=*`, crie `/etc/nginx/sites-available/jexactyl.conf` com uma das configurações abaixo:
-
 <Tabs>
-  <TabItem value="docker-ssl" label="Docker + Nginx (Com SSL)" default>
-    <NginxDockerSSL />
-  </TabItem>
-  <TabItem value="docker-nossl" label="Docker + Nginx (Sem SSL)">
-    <NginxDockerNoSSL />
-  </TabItem>
-</Tabs>
-
----
-
-## Opção 2: Nginx para Instalação Direta na Máquina (`php8.4-fpm.sock`)
+  <TabItem value="host" label="Maquina Host" default>
 
 Se você instalou o painel diretamente em `/var/www/jexactyl` com **PHP 8.4**, remova o site padrão e crie `/etc/nginx/sites-available/panel.conf`:
 
@@ -36,19 +20,40 @@ sudo nano /etc/nginx/sites-available/panel.conf
 
 Substitua `<domain>` pelo seu domínio ou IP:
 
-<Tabs>
-  <TabItem value="host-ssl" label="Host PHP 8.4 (Com SSL)" default>
+<Tabs groupId="ssl">
+  <TabItem value="ssl" label="Com SSL" default>
     <NginxSSL jex={true} phpVersion="8.4" />
   </TabItem>
-  <TabItem value="host-nossl" label="Host PHP 8.4 (Sem SSL)">
+  <TabItem value="nossl" label="Sem SSL">
     <NginxNoSSL jex={true} phpVersion="8.4" />
   </TabItem>
 </Tabs>
-
-### Ativando a Configuração no Nginx
 
 ```bash
 sudo ln -sf /etc/nginx/sites-available/panel.conf /etc/nginx/sites-enabled/panel.conf
 sudo nginx -t
 sudo systemctl restart nginx
 ```
+
+  </TabItem>
+  <TabItem value="docker" label="Docker">
+
+Se você subiu o painel via Docker com `PANEL_PORT=127.0.0.1:8085` e `TRUSTED_PROXIES=*`, crie `/etc/nginx/sites-available/jexactyl.conf`:
+
+<Tabs groupId="ssl">
+  <TabItem value="ssl" label="Com SSL" default>
+    <NginxDockerSSL />
+  </TabItem>
+  <TabItem value="nossl" label="Sem SSL">
+    <NginxDockerNoSSL />
+  </TabItem>
+</Tabs>
+
+```bash
+sudo ln -sf /etc/nginx/sites-available/jexactyl.conf /etc/nginx/sites-enabled/jexactyl.conf
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+  </TabItem>
+</Tabs>
