@@ -5,7 +5,7 @@ sidebar_position: 1
 # Introdução do Painel (v3.8.6)
 
 :::danger Alerta Crítico de Segurança — Atualize da v3.8.6 para a v4.0.7 (PHP2Shell)
-Você está visualizando a documentação legada da versão **v3.8.6** (baseada em PHP 8.1). Instalações antigas estão expostas às vulnerabilidades críticas **PHP2Shell (CVE-2026-109618 / CVE-2026-109619)** e **CVE-2025-49132**, que permitem leitura de memória (`.env`, `APP_KEY` e senhas do banco) e execução remota de código (RCE). [**Acesse a documentação da v4.0.7 e atualize imediatamente →**](/docs/Jexactyl/v4.0.7/intro)
+Você está visualizando a documentação legada da versão **v3.8.6** (baseada em PHP 8.1). Instalações antigas estão expostas às vulnerabilidades críticas **PHP2Shell (CVE-2026-109618 / CVE-2026-109619)** e **CVE-2025-49132**, que permitem leitura de memória (`.env`, `APP_KEY` e senhas do banco) e execução remota de código (RCE). [**Acesse a documentação da v4.0.7 e atualize imediatamente →**](/docs/Jexactyl/v4.x.x/intro)
 :::
 
 [![Logo Image](https://cdn.discordapp.com/attachments/1012411945141424218/1012430446556090468/JexactylBannerBasic.jpg)](https://nextpanel.com.br/)

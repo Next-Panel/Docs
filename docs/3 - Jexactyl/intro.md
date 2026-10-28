@@ -30,8 +30,8 @@ Use o seletor no topo da página caso deseje alternar para a documentação lega
 
 | Método de Instalação | Indicação | Guia Passo a Passo |
 | :--- | :--- | :--- |
-| **1. Via Docker — Recomendado** | Subida rápida usando a imagem oficial pré-compilada (`ghcr.io/next-panel/jexactyl-br:latest`) com MariaDB 11 e Redis integrados, sem precisar instalar PHP, Composer ou Node.js no host. Compatível com **Caddy** e **Nginx**. | [**Instalar via Docker (Recomendado) →**](/docs/Jexactyl/v4.0.7/docker/subida-rapida) |
-| **2. Diretamente na Máquina (Host)** | Instalação clássica *bare-metal* em servidores Ubuntu 22.04/24.04 ou Debian 11/12 configurando PHP 8.4, MariaDB, Redis e servidor web diretamente no sistema operacional. | [**Instalar na Máquina (Host) →**](/docs/Jexactyl/v4.0.7/host/dependencias) |
+| **1. Via Docker — Recomendado** | Subida rápida usando a imagem oficial pré-compilada (`ghcr.io/next-panel/jexactyl-br:latest`) com MariaDB 11 e Redis integrados, sem precisar instalar PHP, Composer ou Node.js no host. Compatível com **Caddy** e **Nginx**. | [**Instalar via Docker (Recomendado) →**](/docs/Jexactyl/v4.x.x/docker/subida-rapida) |
+| **2. Diretamente na Máquina (Host)** | Instalação clássica *bare-metal* em servidores Ubuntu 22.04/24.04 ou Debian 11/12 configurando PHP 8.4, MariaDB, Redis e servidor web diretamente no sistema operacional. | [**Instalar na Máquina (Host) →**](/docs/Jexactyl/v4.x.x/host/dependencias) |
 | **3. Documentação Legada (`v3.8.6`)** | Apenas para consulta de ambientes antigos ainda em processo de migração. | [**Consultar v3.8.6 (Legado) →**](/docs/Jexactyl/v3.8.6/intro) |
 
 ---

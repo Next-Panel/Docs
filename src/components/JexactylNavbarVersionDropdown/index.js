@@ -4,11 +4,11 @@ import DropdownNavbarItem from '@theme/NavbarItem/DropdownNavbarItem';
 
 const VERSIONS = [
   {
-    version: 'v4.0.7',
-    label: 'v4.0.7 (Atual)',
-    to: '/docs/Jexactyl/v4.0.7/intro',
+    version: 'v4.x.x',
+    label: 'v4.x.x (Atual)',
+    to: '/docs/Jexactyl/v4.x.x/intro',
     isActive: (pathname) =>
-      pathname.startsWith('/docs/Jexactyl/v4.0.7') ||
+      pathname.startsWith('/docs/Jexactyl/v4.x.x') ||
       pathname === '/docs/Jexactyl/intro' ||
       pathname === '/docs/Jexactyl/intro/',
   },

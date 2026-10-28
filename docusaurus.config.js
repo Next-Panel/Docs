@@ -107,7 +107,7 @@ const config = {
               },
               {
                 label: 'Jexactyl (Recomendado)',
-                to: '/docs/Jexactyl/v4.0.7/intro',
+                to: '/docs/Jexactyl/v4.x.x/intro',
               },
               {
                 label: 'Jexactyl v3.8.6 (Legado)',

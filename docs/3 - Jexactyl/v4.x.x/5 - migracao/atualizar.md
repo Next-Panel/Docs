@@ -8,7 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 :::warning Migração da v3.8.6 ou do Pterodactyl?
-Este guia é para atualizar uma instância que **já está na v4** para uma nova release. Se você está na `v3.8.6` ou no Pterodactyl `v1.x`, consulte os guias específicos em **[Migrar da v3.8.6 para v4.0.7](/docs/Jexactyl/v4.0.7/migracao/migrar-v3-para-v4)** ou **[Migrar de Host para Docker](/docs/Jexactyl/v4.0.7/migracao/migrar-host-para-docker)**.
+Este guia é para atualizar uma instância que **já está na v4** para uma nova release. Se você está na `v3.8.6` ou no Pterodactyl `v1.x`, consulte os guias específicos em **[Migrar da v3.8.6 para v4.0.7](/docs/Jexactyl/v4.x.x/migracao/migrar-v3-para-v4)** ou **[Migrar de Host para Docker](/docs/Jexactyl/v4.x.x/migracao/migrar-host-para-docker)**.
 :::
 
 ---

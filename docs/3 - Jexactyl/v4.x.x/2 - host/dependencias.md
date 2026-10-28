@@ -5,7 +5,7 @@ sidebar_position: 1
 # Instalar Dependências (Host)
 
 :::tip Prefere uma instalação rápida e isolada?
-Recomendamos a **[Instalação via Docker](/docs/Jexactyl/v4.0.7/docker/subida-rapida)**, que não exige instalar pacotes PHP, Composer ou MariaDB diretamente no sistema operacional. Siga este guia apenas se desejar instalar o painel diretamente na máquina (*bare-metal*).
+Recomendamos a **[Instalação via Docker](/docs/Jexactyl/v4.x.x/docker/subida-rapida)**, que não exige instalar pacotes PHP, Composer ou MariaDB diretamente no sistema operacional. Siga este guia apenas se desejar instalar o painel diretamente na máquina (*bare-metal*).
 :::
 
 ## Sistemas Operacionais Suportados

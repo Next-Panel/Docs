@@ -123,4 +123,4 @@ Você também pode isolar a leitura de credenciais em um script executável (com
 
 ---
 
-Na próxima etapa, veja como expor o painel com **[Caddy ou Nginx (Com e Sem Certificado SSL)](/docs/Jexactyl/v4.0.7/docker/proxy-reverso)** sem conflito de portas.
+Na próxima etapa, veja como expor o painel com **[Caddy ou Nginx (Com e Sem Certificado SSL)](/docs/Jexactyl/v4.x.x/docker/proxy-reverso)** sem conflito de portas.

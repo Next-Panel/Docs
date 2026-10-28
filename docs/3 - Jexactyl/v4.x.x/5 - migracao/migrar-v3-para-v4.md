@@ -7,7 +7,7 @@ sidebar_position: 3
 Este guia descreve como atualizar uma instalação *bare-metal* do **Jexactyl `v3.8.6`** para a **`v4`** diretamente na máquina.
 
 :::tip Alternativa Recomendada
-Você também pode migrar sua instalação diretamente para o **Docker** seguindo o guia **[Migrar da Máquina para Docker](/docs/Jexactyl/v4.0.7/migracao/migrar-host-para-docker)** — o container já traz o PHP 8.4 configurado e aplica as migrações do banco automaticamente!
+Você também pode migrar sua instalação diretamente para o **Docker** seguindo o guia **[Migrar da Máquina para Docker](/docs/Jexactyl/v4.x.x/migracao/migrar-host-para-docker)** — o container já traz o PHP 8.4 configurado e aplica as migrações do banco automaticamente!
 :::
 
 ---
